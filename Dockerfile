@@ -1,0 +1,59 @@
+FROM golang:alpine as tflite_builder
+
+ENV JAVA_HOME /usr/lib/jvm/default-jvm
+
+RUN apk add --no-cache --virtual=.build-deps \
+        bash \
+        cmake \
+        curl \
+        freetype-dev \
+        g++ \
+        gcc \
+        git \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libstdc++ \
+        linux-headers \
+        make \
+        musl-dev \
+        openblas-dev \
+        openjdk8 \
+        patch \
+        perl \
+        python3 \
+        python3-dev \
+        py3-pip \
+        #py-numpy-dev \
+        rsync \
+        sed \
+        swig \
+        zip \
+    && cd /tmp
+ENV PIP_ROOT_USER_ACTION=ignore
+RUN pip3 install --no-cache-dir wheel
+
+# ===================================================
+# Download Tensorflow
+# ===================================================
+ENV TENSORFLOW_VERSION 2.13.0
+
+# WORKDIR /tmp
+WORKDIR /go/src/github.com/tensorflow
+
+# CLONE
+RUN git clone https://github.com/tensorflow/tensorflow.git tensorflow_src
+
+RUN mkdir tflite_build
+
+# change work directory in order to build shared file
+WORKDIR /go/src/github.com/tensorflow/tflite_build
+
+# BUILD
+RUN cmake ../tensorflow_src/tensorflow/lite/c 
+RUN cmake --build . -j
+
+# COPY to other /usr/local/lib
+RUN cp ./tensorflow/lite/tools/make/gen/linux_x86_64/lib/libtensorflow-lite.a /usr/local/lib/
+RUN cp ./tensorflow/lite/tools/make/gen/linux_x86_64/lib/libtensorflow-lite.a /home
+RUN cp ./tensorflow/lite/c/libtensorflowlite_c.so /usr/local/lib/
+RUN cp ./tensorflow/lite/c/libtensorflowlite_c.so /home
