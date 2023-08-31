@@ -5,3 +5,13 @@ RUN sudo apt-get install cmake git
 
 WORKDIR /home/tflite
 RUN git clone https://github.com/tensorflow/tensorflow.git tensorflow_src
+RUN mkdir tflite_build
+
+WORKDIR /home/tflite/tflite_build
+RUN cmake ../tensorflow_src/tensorflow/lite -DCMAKE_BUILD_TYPE=Debug
+RUN cmake --build . -j
+
+RUN cp ./tensorflow/lite/tools/make/gen/linux_x86_64/lib/libtensorflow-lite.a /usr/local/lib/
+RUN cp ./tensorflow/lite/tools/make/gen/linux_x86_64/lib/libtensorflow-lite.a /home
+RUN cp ./tensorflow/lite/c/libtensorflowlite_c.so /usr/local/lib/
+RUN cp ./tensorflow/lite/c/libtensorflowlite_c.so /home
