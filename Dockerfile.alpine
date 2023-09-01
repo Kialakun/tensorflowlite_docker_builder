@@ -49,7 +49,7 @@ RUN mkdir tflite_build
 WORKDIR /go/src/github.com/tensorflow/tflite_build
 
 # BUILD
-RUN cmake ../tensorflow_src/tensorflow/lite/c 
+RUN cmake ../tensorflow_src/tensorflow/lite -DCMAKE_BUILD_TYPE=Debug
 RUN cmake --build . -j
 
 # COPY to other /usr/local/lib
